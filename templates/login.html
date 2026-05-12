@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NeuroScan AI — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,700;1,600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:          #f5f6f8;
+      --panel:       #ffffff;
+      --border:      rgba(0,0,0,0.09);
+      --text:        #0f1117;
+      --text-muted:  #6b7280;
+      --text-dim:    #a0a8b5;
+      --accent:      #0066ff;
+      --accent-dim:  rgba(0,102,255,0.07);
+      --accent-light:#e8f0ff;
+      --accent-glow: rgba(0,102,255,0.2);
+      --danger:      #e8354a;
+      --danger-dim:  rgba(232,53,74,0.08);
+      --font:        'DM Sans', sans-serif;
+      --font-mono:   'DM Mono', monospace;
+      --font-head:   'Fraunces', serif;
+      --shadow-lg:   0 20px 48px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%; font-family: var(--font);
+      background: var(--bg); color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Background */
+    .bg-grid {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image:
+        linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .bg-glow {
+      position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 400px; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse, rgba(0,102,255,0.07) 0%, transparent 68%);
+    }
+    .bg-glow-bottom {
+      position: fixed; bottom: -80px; right: 10%;
+      width: 400px; height: 300px; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse, rgba(0,102,255,0.04) 0%, transparent 70%);
+    }
+
+    /* Layout */
+    .page {
+      position: relative; z-index: 5;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Left panel — branding */
+    .brand-side {
+      padding: 48px 52px;
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid var(--border);
+      background: linear-gradient(160deg, #ffffff 60%, #eef3ff 100%);
+    }
+    .brand-top {}
+    .logo {
+      display: flex; align-items: center; gap: 11px;
+      font-weight: 700; font-size: 1.05rem;
+      color: var(--text); letter-spacing: -0.02em;
+      margin-bottom: 64px;
+    }
+    .logo-icon { color: var(--accent); width: 34px; height: 34px; flex-shrink: 0; }
+    .logo-icon svg { width: 100%; height: 100%; }
+
+    .brand-headline {
+      font-family: var(--font-head);
+      font-size: clamp(2.2rem, 4vw, 3.4rem);
+      font-weight: 700; line-height: 1.08;
+      letter-spacing: -0.025em; color: var(--text);
+      margin-bottom: 20px;
+    }
+    .brand-headline em { color: var(--accent); font-style: italic; }
+    .brand-sub {
+      font-size: 0.95rem; color: var(--text-muted);
+      line-height: 1.7; max-width: 380px; font-weight: 400;
+      margin-bottom: 40px;
+    }
+
+    /* Stats row */
+    .stat-row {
+      display: flex; gap: 28px;
+    }
+    .stat {
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .stat-val {
+      font-family: var(--font-head);
+      font-size: 1.7rem; font-weight: 700;
+      color: var(--accent); letter-spacing: -0.02em;
+    }
+    .stat-key {
+      font-family: var(--font-mono); font-size: 0.62rem;
+      color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase;
+    }
+
+    /* Visual orb */
+    .brand-visual {
+      display: flex; justify-content: center;
+      padding: 20px 0;
+    }
+    .brain-orb {
+      width: 180px; height: 180px; position: relative;
+    }
+    .brain-orb svg { width: 100%; height: 100%; }
+
+    .brand-footer {
+      font-family: var(--font-mono); font-size: 0.62rem;
+      color: var(--text-dim); letter-spacing: 0.06em;
+    }
+
+    /* Right panel — form */
+    .form-side {
+      padding: 48px 52px;
+      display: flex; flex-direction: column;
+      justify-content: center;
+    }
+
+    .form-card {
+      max-width: 400px; width: 100%;
+    }
+
+    .form-heading {
+      font-family: var(--font-head);
+      font-size: 1.9rem; font-weight: 700;
+      letter-spacing: -0.02em; margin-bottom: 6px;
+    }
+    .form-subtext {
+      font-size: 0.88rem; color: var(--text-muted); margin-bottom: 36px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block;
+      font-family: var(--font-mono); font-size: 0.65rem;
+      color: var(--text-muted); letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .form-input {
+      width: 100%; padding: 13px 16px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 10px; color: var(--text); font-family: var(--font);
+      font-size: 0.9rem; outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    .form-input::placeholder { color: var(--text-dim); }
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+      background: #fff;
+    }
+    .form-input.error-field {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px var(--danger-dim);
+    }
+
+    /* Password wrapper */
+    .input-wrapper { position: relative; }
+    .toggle-pw {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--text-dim); padding: 2px; line-height: 0;
+      transition: color 0.15s;
+    }
+    .toggle-pw:hover { color: var(--text-muted); }
+
+    /* Error banner */
+    .error-banner {
+      display: none;
+      background: var(--danger-dim);
+      border: 1px solid rgba(232,53,74,0.2);
+      border-radius: 8px; padding: 10px 14px;
+      font-size: 0.82rem; color: var(--danger);
+      margin-bottom: 16px; align-items: center; gap: 8px;
+    }
+    .error-banner.visible { display: flex; }
+
+    /* Submit */
+    .submit-btn {
+      width: 100%; padding: 14px 24px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 10px;
+      font-family: var(--font); font-weight: 600; font-size: 0.92rem;
+      cursor: pointer; letter-spacing: 0.01em;
+      transition: opacity 0.18s, transform 0.14s, box-shadow 0.2s;
+      box-shadow: 0 4px 14px var(--accent-glow);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 8px;
+    }
+    .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 22px var(--accent-glow); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; transform: none; }
+    .btn-spinner {
+      display: none; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Divider */
+    .form-divider {
+      display: flex; align-items: center; gap: 14px;
+      margin: 24px 0; color: var(--text-dim);
+      font-size: 0.75rem; font-family: var(--font-mono);
+    }
+    .form-divider::before, .form-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Users hint */
+    .users-hint {
+      background: var(--accent-light); border: 1px solid rgba(0,102,255,0.14);
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .users-hint-head {
+      font-family: var(--font-mono); font-size: 0.62rem;
+      color: var(--accent); letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 10px;
+    }
+    .user-row {
+      display: flex; justify-content: space-between;
+      font-size: 0.78rem; color: var(--text-muted);
+      font-family: var(--font-mono); margin-bottom: 4px;
+    }
+    .user-row:last-child { margin-bottom: 0; }
+    .user-row span:first-child { color: var(--text); font-weight: 500; }
+
+    /* Responsive */
+    @media (max-width: 760px) {
+      .page { grid-template-columns: 1fr; }
+      .brand-side { display: none; }
+      .form-side { padding: 40px 24px; align-items: center; }
+      .form-card { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-glow-bottom"></div>
+
+<div class="page">
+
+  <!-- Left: Brand Panel -->
+  <div class="brand-side">
+    <div class="brand-top">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 20 C12 14, 20 10, 20 20 C20 10, 28 14, 28 20 C28 26, 20 30, 20 20 C20 30, 12 26, 12 20Z" stroke="currentColor" stroke-width="1.2" fill="none"/>
+            <circle cx="20" cy="20" r="2.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <span>NeuroScan AI</span>
+      </div>
+
+      <div class="brand-visual">
+        <div class="brain-orb">
+          <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="90" cy="90" r="82" stroke="rgba(0,102,255,0.12)" stroke-width="1"/>
+            <circle cx="90" cy="90" r="65" stroke="rgba(0,102,255,0.1)" stroke-width="1" stroke-dasharray="4 5"/>
+            <circle cx="90" cy="90" r="48" stroke="rgba(0,102,255,0.15)" stroke-width="1.5"/>
+            <circle cx="90" cy="90" r="30" fill="rgba(0,102,255,0.06)" stroke="rgba(0,102,255,0.18)" stroke-width="1"/>
+            <!-- Brain paths -->
+            <path d="M68 90 C68 76, 82 68, 90 80 C90 68, 102 72, 108 82 C114 90 110 104 102 108 C96 112 84 110 78 106 C70 102 66 98 68 90Z" stroke="#0066ff" stroke-width="1.4" fill="rgba(0,102,255,0.05)"/>
+            <path d="M90 80 L90 90 M80 86 L100 86" stroke="#0066ff" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+            <!-- Scan lines -->
+            <line x1="8" y1="90" x2="42" y2="90" stroke="rgba(0,102,255,0.25)" stroke-width="1" stroke-dasharray="2 3"/>
+            <line x1="138" y1="90" x2="172" y2="90" stroke="rgba(0,102,255,0.25)" stroke-width="1" stroke-dasharray="2 3"/>
+            <line x1="90" y1="8" x2="90" y2="42" stroke="rgba(0,102,255,0.25)" stroke-width="1" stroke-dasharray="2 3"/>
+            <line x1="90" y1="138" x2="90" y2="172" stroke="rgba(0,102,255,0.25)" stroke-width="1" stroke-dasharray="2 3"/>
+            <!-- Corner marks -->
+            <path d="M32 20 L20 20 L20 32" stroke="rgba(0,102,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M148 20 L160 20 L160 32" stroke="rgba(0,102,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M32 160 L20 160 L20 148" stroke="rgba(0,102,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M148 160 L160 160 L160 148" stroke="rgba(0,102,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <h1 class="brand-headline">Brain Tumor<br/><em>Detection</em><br/>System</h1>
+      <p class="brand-sub">Powered by EfficientNetB0 and federated learning for privacy-preserving medical AI. Upload MRI scans and receive instant diagnostic classification.</p>
+
+      <div class="stat-row">
+        <div class="stat">
+          <span class="stat-val">4</span>
+          <span class="stat-key">Categories</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val">224px</span>
+          <span class="stat-key">Input Size</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val">FL</span>
+          <span class="stat-key">Federated</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand-footer">Final Year Project · EfficientNetB0 · TensorFlow · Flask</div>
+  </div>
+
+  <!-- Right: Form Panel -->
+  <div class="form-side">
+    <div class="form-card">
+      <h2 class="form-heading">Welcome back</h2>
+      <p class="form-subtext">Sign in to access NeuroScan AI</p>
+
+      <div class="error-banner" id="errorBanner">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 1a7 7 0 100 14A7 7 0 008 1zM7 4h2v5H7V4zm0 6h2v2H7v-2z"/>
+        </svg>
+        <span id="errorText">Invalid username or password.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input class="form-input" type="text" id="username" placeholder="Enter your username" autocomplete="username" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-wrapper">
+          <input class="form-input" type="password" id="password" placeholder="Enter your password" autocomplete="current-password" />
+          <button class="toggle-pw" type="button" id="togglePw" aria-label="Toggle password visibility">
+            <svg id="eyeOpen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg id="eyeClosed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+              <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="loginBtn" onclick="handleLogin()">
+        <span id="btnText">Sign In</span>
+        <span id="btnArrow">→</span>
+        <div class="btn-spinner" id="loginSpinner"></div>
+      </button>
+
+      <div class="form-divider">authorized users only</div>
+
+      <div class="users-hint">
+        <div class="users-hint-head">Project Team Access</div>
+        <div class="user-row"><span>satvik</span><span>··········</span></div>
+        <div class="user-row"><span>omkar</span><span>··········</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Credentials
+  const USERS = { satvik: 'satvik', omkar: 'omkar' };
+
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const errorBanner   = document.getElementById('errorBanner');
+  const errorText     = document.getElementById('errorText');
+  const loginBtn      = document.getElementById('loginBtn');
+  const loginSpinner  = document.getElementById('loginSpinner');
+  const btnText       = document.getElementById('btnText');
+  const btnArrow      = document.getElementById('btnArrow');
+  const togglePw      = document.getElementById('togglePw');
+
+  // Toggle password visibility
+  togglePw.addEventListener('click', () => {
+    const isText = passwordInput.type === 'text';
+    passwordInput.type = isText ? 'password' : 'text';
+    document.getElementById('eyeOpen').style.display  = isText ? 'block' : 'none';
+    document.getElementById('eyeClosed').style.display = isText ? 'none' : 'block';
+  });
+
+  // Enter key
+  [usernameInput, passwordInput].forEach(el =>
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); })
+  );
+
+  // Clear errors on input
+  [usernameInput, passwordInput].forEach(el => el.addEventListener('input', () => {
+    el.classList.remove('error-field');
+    errorBanner.classList.remove('visible');
+  }));
+
+  function setLoading(on) {
+    loginBtn.disabled = on;
+    loginSpinner.style.display = on ? 'block' : 'none';
+    btnText.textContent = on ? 'Signing in…' : 'Sign In';
+    btnArrow.style.display = on ? 'none' : 'inline';
+  }
+
+  function showError(msg) {
+    errorText.textContent = msg;
+    errorBanner.classList.add('visible');
+    usernameInput.classList.add('error-field');
+    passwordInput.classList.add('error-field');
+    passwordInput.value = '';
+    passwordInput.focus();
+    // Shake animation
+    errorBanner.style.animation = 'none';
+    errorBanner.offsetHeight;
+    errorBanner.style.animation = 'shake 0.4s ease';
+  }
+
+  function handleLogin() {
+    const user = usernameInput.value.trim().toLowerCase();
+    const pass = passwordInput.value;
+
+    if (!user) { usernameInput.focus(); usernameInput.classList.add('error-field'); return; }
+    if (!pass) { passwordInput.focus(); passwordInput.classList.add('error-field'); return; }
+
+    setLoading(true);
+
+    // Simulate async check
+    setTimeout(() => {
+      if (USERS[user] && USERS[user] === pass) {
+        // Store session and redirect
+        sessionStorage.setItem('ns_user', user);
+        window.location.href = '/';
+      } else {
+        setLoading(false);
+        showError('Invalid username or password. Please try again.');
+      }
+    }, 700);
+  }
+
+  // Shake keyframes injected
+  const style = document.createElement('style');
+  style.textContent = `@keyframes shake {
+    0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+  }`;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brain Tumor Detection — NeuroScan AI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,700;1,600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 20 C12 14, 20 10, 20 20 C20 10, 28 14, 28 20 C28 26, 20 30, 20 20 C20 30, 12 26, 12 20Z" stroke="currentColor" stroke-width="1.2" fill="none"/>
+            <circle cx="20" cy="20" r="2.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <span>NeuroScan AI</span>
+      </div>
+
+      <div class="header-right">
+        <div class="header-badge">Federated Learning · Final Year Project</div>
+        <div class="user-chip">
+          <div class="user-avatar" id="userAvatar">--</div>
+          <span id="userLabel">User</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="hero-label">EfficientNetB0 · TensorFlow · Flask</p>
+      <h1>Brain Tumor<br/><span class="accent">Detection</span></h1>
+      <p class="hero-sub">Upload an MRI scan. Our model classifies it into one of four categories with high confidence using deep learning.</p>
+    </section>
+
+    <div class="app-container">
+
+      <!-- Upload Panel -->
+      <div class="panel upload-panel" id="uploadPanel">
+        <div class="panel-label">01 — Upload Scan</div>
+
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput" accept="image/*" hidden />
+
+          <div class="drop-content" id="dropContent">
+            <div class="drop-icon">
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="8" y="16" width="48" height="36" rx="4" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <path d="M32 36 L32 24 M26 30 L32 24 L38 30" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M22 48 C22 44 42 44 42 48" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <p class="drop-title">Drop MRI image here</p>
+            <p class="drop-sub">or <button class="browse-btn" onclick="document.getElementById('fileInput').click()">browse files</button></p>
+            <p class="drop-formats">JPG · PNG · BMP · TIFF · WEBP</p>
+          </div>
+
+          <div class="preview-content" id="previewContent" style="display:none;">
+            <img id="previewImage" src="" alt="MRI Preview" />
+            <div class="preview-overlay">
+              <button class="change-btn" onclick="document.getElementById('fileInput').click()">Change Image</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="file-info" id="fileInfo" style="display:none;">
+          <span class="file-name" id="fileName"></span>
+          <span class="file-size" id="fileSize"></span>
+        </div>
+
+        <button class="predict-btn" id="predictBtn" disabled onclick="runPrediction()">
+          <span class="btn-text">Analyze Scan</span>
+          <span class="btn-icon">→</span>
+          <div class="btn-spinner" id="btnSpinner"></div>
+        </button>
+      </div>
+
+      <!-- Result Panel -->
+      <div class="panel result-panel" id="resultPanel">
+        <div class="panel-label">02 — Diagnosis</div>
+
+        <div class="result-idle" id="resultIdle">
+          <div class="idle-icon">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="40" r="35" stroke="currentColor" stroke-width="1" stroke-dasharray="3 4" opacity="0.3"/>
+              <circle cx="40" cy="40" r="22" stroke="currentColor" stroke-width="1" opacity="0.2"/>
+              <circle cx="40" cy="40" r="6" fill="currentColor" opacity="0.15"/>
+              <path d="M40 18 L40 22 M40 58 L40 62 M18 40 L22 40 M58 40 L62 40" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+            </svg>
+          </div>
+          <p>Awaiting scan upload and analysis</p>
+        </div>
+
+        <div class="result-content" id="resultContent" style="display:none;">
+          <div class="result-status" id="resultStatus">
+            <div class="status-dot"></div>
+            <span>Analysis Complete</span>
+          </div>
+
+          <div class="diagnosis-box">
+            <div class="diagnosis-label">Predicted Classification</div>
+            <div class="diagnosis-value" id="diagnosisValue">—</div>
+            <div class="diagnosis-desc" id="diagnosisDesc">—</div>
+          </div>
+
+          <div class="confidence-box">
+            <div class="confidence-header">
+              <span>Confidence Score</span>
+              <span class="confidence-pct" id="confidencePct">—</span>
+            </div>
+            <div class="confidence-bar-track">
+              <div class="confidence-bar-fill" id="confidenceBar"></div>
+            </div>
+          </div>
+
+          <div class="class-breakdown" id="classBreakdown">
+            <div class="breakdown-label">Classification Categories</div>
+            <div class="breakdown-items">
+              <div class="breakdown-item" data-class="0">
+                <span>Glioma Tumor</span>
+                <span class="breakdown-tag">Class 0</span>
+              </div>
+              <div class="breakdown-item" data-class="1">
+                <span>Meningioma Tumor</span>
+                <span class="breakdown-tag">Class 1</span>
+              </div>
+              <div class="breakdown-item" data-class="2">
+                <span>Normal</span>
+                <span class="breakdown-tag">Class 2</span>
+              </div>
+              <div class="breakdown-item" data-class="3">
+                <span>Pituitary Tumor</span>
+                <span class="breakdown-tag">Class 3</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="reset-btn" onclick="resetApp()">← Analyze Another Scan</button>
+        </div>
+
+        <div class="result-error" id="resultError" style="display:none;">
+          <div class="error-icon">⚠</div>
+          <p id="errorMessage">An error occurred.</p>
+          <button class="reset-btn" onclick="resetApp()">Try Again</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Model Info Strip -->
+    <div class="info-strip">
+      <div class="info-item">
+        <span class="info-key">Architecture</span>
+        <span class="info-val">EfficientNetB0</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-item">
+        <span class="info-key">Input Size</span>
+        <span class="info-val">224 × 224 px</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-item">
+        <span class="info-key">Classes</span>
+        <span class="info-val">4 Categories</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-item">
+        <span class="info-key">Framework</span>
+        <span class="info-val">TensorFlow / Keras</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-item">
+        <span class="info-key">Privacy</span>
+        <span class="info-val">Federated Learning</span>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Final Year Project &mdash; Brain Tumor Detection using Federated Learning</p>
+  </footer>
+
+  <script>
+    // ---- Session Guard ----
+    const currentUser = sessionStorage.getItem('ns_user');
+    if (!currentUser) {
+      window.location.href = '/login';
+    } else {
+      document.getElementById('userLabel').textContent = currentUser;
+      document.getElementById('userAvatar').textContent = currentUser.slice(0,2).toUpperCase();
+    }
+
+    function logout() {
+      sessionStorage.removeItem('ns_user');
+      window.location.href = '/login';
+    }
+
+    // ---- File Handling ----
+    const fileInput     = document.getElementById('fileInput');
+    const dropZone      = document.getElementById('dropZone');
+    const dropContent   = document.getElementById('dropContent');
+    const previewContent = document.getElementById('previewContent');
+    const previewImage  = document.getElementById('previewImage');
+    const fileInfo      = document.getElementById('fileInfo');
+    const fileName      = document.getElementById('fileName');
+    const fileSize      = document.getElementById('fileSize');
+    const predictBtn    = document.getElementById('predictBtn');
+    const btnSpinner    = document.getElementById('btnSpinner');
+    let selectedFile    = null;
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) handleFile(file);
+    });
+    dropZone.addEventListener('click', e => {
+      if (!e.target.closest('button')) fileInput.click();
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    });
+
+    function handleFile(file) {
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImage.src = e.target.result;
+        dropContent.style.display = 'none';
+        previewContent.style.display = 'flex';
+      };
+      reader.readAsDataURL(file);
+      fileName.textContent = file.name;
+      fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+      fileInfo.style.display = 'flex';
+      predictBtn.disabled = false;
+      document.getElementById('resultIdle').style.display = 'flex';
+      document.getElementById('resultContent').style.display = 'none';
+      document.getElementById('resultError').style.display = 'none';
+    }
+
+    async function runPrediction() {
+      if (!selectedFile) return;
+      predictBtn.disabled = true;
+      predictBtn.querySelector('.btn-text').textContent = 'Analyzing...';
+      predictBtn.querySelector('.btn-icon').style.display = 'none';
+      btnSpinner.style.display = 'block';
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      try {
+        const response = await fetch('/predict', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (data.error) throw new Error(data.error);
+        showResult(data);
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        predictBtn.disabled = false;
+        predictBtn.querySelector('.btn-text').textContent = 'Analyze Scan';
+        predictBtn.querySelector('.btn-icon').style.display = 'inline';
+        btnSpinner.style.display = 'none';
+      }
+    }
+
+    function showResult(data) {
+      document.getElementById('resultIdle').style.display = 'none';
+      document.getElementById('resultError').style.display = 'none';
+      const resultContent = document.getElementById('resultContent');
+      resultContent.style.display = 'flex';
+      document.getElementById('diagnosisValue').textContent = data.label;
+      document.getElementById('diagnosisDesc').textContent = data.description;
+      document.getElementById('confidencePct').textContent = data.confidence + '%';
+      const bar = document.getElementById('confidenceBar');
+      bar.style.width = '0%';
+      const isNormal = data.class_index === 2;
+      bar.className = 'confidence-bar-fill ' + (isNormal ? 'bar-normal' : 'bar-tumor');
+      setTimeout(() => { bar.style.width = data.confidence + '%'; }, 100);
+      document.querySelectorAll('.breakdown-item').forEach(el => {
+        el.classList.remove('active');
+        if (parseInt(el.dataset.class) === data.class_index) el.classList.add('active');
+      });
+      resultContent.style.opacity = '0';
+      resultContent.style.transform = 'translateY(10px)';
+      setTimeout(() => {
+        resultContent.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        resultContent.style.opacity = '1';
+        resultContent.style.transform = 'translateY(0)';
+      }, 50);
+    }
+
+    function showError(msg) {
+      document.getElementById('resultIdle').style.display = 'none';
+      document.getElementById('resultContent').style.display = 'none';
+      document.getElementById('resultError').style.display = 'flex';
+      document.getElementById('errorMessage').textContent = msg;
+    }
+
+    function resetApp() {
+      selectedFile = null;
+      fileInput.value = '';
+      dropContent.style.display = 'flex';
+      previewContent.style.display = 'none';
+      fileInfo.style.display = 'none';
+      predictBtn.disabled = true;
+      document.getElementById('resultIdle').style.display = 'flex';
+      document.getElementById('resultContent').style.display = 'none';
+      document.getElementById('resultError').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
